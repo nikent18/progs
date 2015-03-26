@@ -30,7 +30,7 @@ public class Mail {
         return SUBJ;
     }
     public String mailBody(String body) {
-       BODY=XMAILER+MIME+CONTENT_TYPE+"\r\n"+body+"\r\n"+ END;
+       BODY=XMAILER+MIME+CONTENT_TYPE+"\r\n"+body+ END;
        return BODY;
     }
 

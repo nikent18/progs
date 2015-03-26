@@ -100,7 +100,7 @@ public class ServerConnection {
         }
         return body;
     }
-
+    
     public void sendMail(String pass, String login) {
         try {
             String tmp;
