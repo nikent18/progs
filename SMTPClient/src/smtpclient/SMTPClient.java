@@ -18,6 +18,22 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class SMTPClient {
 
+    static PrintStream ps = null;
+    static DataInputStream dis = null;
+    static Socket smtp;
+    static SocketFactory factory;
+    static String SMTPServer;
+
+    SMTPClient() throws IOException {
+        factory = SSLSocketFactory.getDefault();
+
+        smtp = factory.createSocket("smtp.yandex.ru", 465);
+        OutputStream os = smtp.getOutputStream();
+        ps = new PrintStream(os);
+        InputStream is = smtp.getInputStream();
+        dis = new DataInputStream(is);
+    }
+
     public static String encodeString(String str) {
         byte[] b = str.getBytes();
         String encodedStr = Base64.getEncoder().encodeToString(b);
@@ -26,6 +42,10 @@ public class SMTPClient {
 
     public static boolean isAddressCorrect(String addr) {
         if (addr.length() < 6) {
+            return false;
+        }
+            boolean b=addr.indexOf('@') == -1 || addr.indexOf('.') == -1;
+        if (b) {
             return false;
         }
         String domain = addr.substring(addr.indexOf('.') + 1);
@@ -37,20 +57,21 @@ public class SMTPClient {
                 return false;
             }
         }
-        if ((addr.indexOf('@') == 0 || addr.indexOf('@') == addr.length() - 1
+    
+        if ((addr.indexOf('@') == 0 
                 || addr.indexOf('@') == (addr.indexOf('.') + 1)
                 || addr.indexOf('@') == (addr.indexOf('.') - 1))) {
             return false;
         }
+
         return true;
     }
-
    
+    public static void main(String args[]) throws UnsupportedEncodingException, IOException {
 
-    public static void main(String args[]) throws UnsupportedEncodingException {
-        //    String domain = addr.substring(addr.indexOf('.'), addr.length()-1);
+        new SMTPClient();
+        ServerConnection con = new ServerConnection();
 
-        ServerConnection con = new ServerConnection("smtp.yandex.ru", 465);
         Scanner scan = new Scanner(System.in);
         System.out.println("Enter dest");
         con.dest = scan.nextLine();
@@ -65,7 +86,8 @@ public class SMTPClient {
         System.out.println("Enter password");
         con.pass = scan.nextLine();
 
-        con.sendMail(encodeString(con.pass), encodeString(con.source));
+        con.sendMail(encodeString(con.pass), encodeString(con.source), ps, dis);
     }
+    
 
 }

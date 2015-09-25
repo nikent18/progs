@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @author nikita
  */
 public class Mail {
-
+    Utils util;
     String BODY = "";
     String SUBJ;
     String XMAILER = "X-MAILER: NIKMailer\r\n";
@@ -24,10 +24,12 @@ public class Mail {
     String CONTENT_TYPE = "CONTENT-TYPE: text/plain\r\n";
     String END = "\r\n.\r\n";
     public String mailSubj() {
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Enter subject");
-        SUBJ = scan.nextLine();
-        return SUBJ;
+        util = new Utils();
+        return util.enterSubj();
+   //     Scanner scan = new Scanner(System.in);
+   //     System.out.println("Enter subject");
+    //    SUBJ = scan.nextLine();
+    //    return SUBJ;
     }
     public String mailBody(String body) {
        BODY=XMAILER+MIME+CONTENT_TYPE+"\r\n"+body+ END;

@@ -23,8 +23,8 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class ServerConnection {
 
-    PrintStream ps = null;
-    DataInputStream dis = null;
+    //   PrintStream ps = null;
+//    DataInputStream dis = null;
     Socket smtp;
     SocketFactory factory;
     String SMTPServer;
@@ -45,25 +45,25 @@ public class ServerConnection {
     String QUIT = "QUIT";
     String loc;
 
-    public ServerConnection(String serv, int port) {
+    public ServerConnection() {
         mail = new Mail();
 
-        factory = SSLSocketFactory.getDefault();
-        SMTPServer = serv;
-        PORT = port;
-        try {
-            smtp = smtp = factory.createSocket(SMTPServer, PORT);
-            OutputStream os = smtp.getOutputStream();
-            ps = new PrintStream(os);
-            InputStream is = smtp.getInputStream();
-            dis = new DataInputStream(is);
-        } catch (IOException ex) {
-            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        //     factory = SSLSocketFactory.getDefault();
+        //  SMTPServer = serv;
+        //  PORT = port;
+      /*  try {
+         smtp = smtp = factory.createSocket(SMTPServer, PORT);
+         OutputStream os = smtp.getOutputStream();
+         ps = new PrintStream(os);
+         InputStream is = smtp.getInputStream();
+         dis = new DataInputStream(is);
+         } catch (IOException ex) {
+         Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
+         }*/
     }
 
-    public void send(String str) {
-        ps.println(str);      // посылка строки на SMTP
+    public void send(String str, PrintStream ps1) {
+        ps1.println(str);      // посылка строки на SMTP
         System.out.println("sent: " + str);
     }
     /*
@@ -75,15 +75,15 @@ public class ServerConnection {
      }
      */
 
-    public void checkInput(DataInputStream dis) throws IOException {
+    public boolean checkInput(DataInputStream dis) throws IOException {
         String readstr;
 
         readstr = dis.readLine();
         System.out.println("SMTP respons: " + readstr);
         if (readstr.charAt(0) == '5' || readstr.charAt(0) == '4') {
-            return;
+            return false;
         }
-
+        return true;
     }
 
     public String enterMessage() {
@@ -100,40 +100,68 @@ public class ServerConnection {
         }
         return body;
     }
-    
-    public void sendMail(String pass, String login) {
+
+    public boolean sendMail(String pass, String login, PrintStream ps1, DataInputStream dis1) {
         try {
             String tmp;
-            send(HELO + loc);
-            checkInput(dis);          // получение ответа SMTP
-            send(AUTH);
-            checkInput(dis);
-            send(login);
-            checkInput(dis);
-            send(pass);
-            checkInput(dis);
-            send(MAIL_FROM + source);
-            checkInput(dis);
-            send(RCPT_TO + dest);
-            checkInput(dis);
-            send(DATA);
-            checkInput(dis);
+            send(HELO + loc, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(AUTH, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(login, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(pass, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(MAIL_FROM + source, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(RCPT_TO + dest, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(DATA, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
 
-            send("FROM: " + source);
+            send("FROM: " + source, ps1);
 
-            send(SUBJECT + mail.mailSubj());
+            send(SUBJECT + mail.mailSubj(), ps1);
 
-            send("TO: " + dest);
-            checkInput(dis);
+            send("TO: " + dest, ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
 
             tmp = enterMessage();
             //    System.out.println(tmp);
-            send(mail.mailBody(tmp));
-            checkInput(dis);
-            send(QUIT);
+            send(mail.mailBody(tmp), ps1);
+            if (!checkInput(dis1)) // получение ответа SMTP
+            {
+                return false;
+            }
+            send(QUIT, ps1);
         } catch (IOException e) {
             System.out.println("Error sending: " + e);
         }
 
+        return true;
     }
 }
